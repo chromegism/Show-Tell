@@ -119,7 +119,7 @@ def main():
         if event.key == pygame.K_ESCAPE:
           running = False
 
-    renderloop()
+    # renderloop()
 
     glClearColor(0.2, 0.3, 0.3, 1.0)
     glClear(GL_COLOR_BUFFER_BIT)
