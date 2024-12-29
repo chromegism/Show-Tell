@@ -1,6 +1,9 @@
 import pygame
 from OpenGL.GL import *
+from OpenGL.GL.shaders import compileShader, compileProgram
 from OpenGL.GLU import *
+import ctypes
+print("Imports successful")
 
 
 class Display:
@@ -10,6 +13,8 @@ class Display:
     self.clock = pygame.time.Clock()
     self.dt = 0.1
     self.framerate = framerate
+
+    glViewport(0, 0, width, height)
 
     glEnable(GL_DEPTH_TEST)
 
@@ -57,8 +62,50 @@ def renderloop():
   pass
 
 
+
+sizeOfFloat = ctypes.sizeof(GLfloat)
+# Three vertices, with an x,y,z & w for each.
+vertices = [
+  -0.5, -0.5, 0.0,
+   0.5, -0.5, 0.0,
+   0.0,  0.5, 0.0
+]
+
+
 def main():
   setup()
+
+  with open("shaders/test.vert.glsl", "r") as vertexShader, open("shaders/test.frag.glsl", "r") as fragmentShader:
+    vertStr = vertexShader.read()
+    fragStr = fragmentShader.read()
+
+    print(vertStr)
+    print(fragStr)
+
+    program = compileProgram(
+        compileShader(vertStr, GL_VERTEX_SHADER),
+        compileShader(fragStr, GL_FRAGMENT_SHADER)
+    )
+
+  VBO, VAO = 0, 0
+  VAO = glGenVertexArrays(1)
+  VBO = glGenBuffers(1)
+  glBindVertexArray(VAO)
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO)
+  array_type = (GLfloat * len(vertices))
+  glBufferData(GL_ARRAY_BUFFER, 
+               len(vertices) * sizeOfFloat, 
+               array_type(*vertices), 
+               GL_STATIC_DRAW)
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeOfFloat, None)
+  glEnableVertexAttribArray(0)
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+  glBindVertexArray(0)
+
 
   running = True
   while running:
@@ -73,6 +120,15 @@ def main():
           running = False
 
     renderloop()
+
+    glClearColor(0.2, 0.3, 0.3, 1.0)
+    glClear(GL_COLOR_BUFFER_BIT)
+
+    glUseProgram(program)
+    glBindVertexArray(VAO)
+    glDrawArrays(GL_TRIANGLES, 0, 3)
+
+    display.update()
 
     display.tick()
 
