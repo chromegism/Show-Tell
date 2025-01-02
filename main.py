@@ -2,8 +2,16 @@ import pygame
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileShader, compileProgram
 from OpenGL.GLU import *
+
+import glm
+
 import ctypes
+from ctypes import sizeof
 import numpy
+import objparser
+
+from VAO import *
+from Buffer import *
 print("Imports successful")
 
 
@@ -46,6 +54,9 @@ class EventHandler(list):
   def setvals(self, items: list[pygame.Event]):
     super().__init__(items)
 
+  def fetch(self):
+    super().__init__(pygame.event.get())
+
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -69,19 +80,14 @@ def renderloop():
   pass
 
 
-sizeOfFloat = ctypes.sizeof(GLfloat)
-# Three vertices, with an x,y,z for each.
-vertices = numpy.array([
-  -0.5, -0.5, 0.0,
-   0.5, -0.5, 0.0,
-   0.0,  0.5, 0.0
-], GLfloat)
-
-# indices = numpy.array([0, 1, 2], GLfloat)
-
-
 def main():
   setup()
+
+  parser = objparser.OBJparser("objects/test.obj")
+  triangle = parser.array_parse()
+
+  vertices = triangle["v"]
+  indices = triangle["f"]
 
   with open("shaders/test.vert.glsl", "r") as vertexShader, open("shaders/test.frag.glsl", "r") as fragmentShader:
     vertStr = vertexShader.read()
@@ -93,30 +99,42 @@ def main():
     )
 
   # Create Vertex Array Object
-  VAO = glGenVertexArrays(1)
-  glBindVertexArray(VAO)
+  vao = VAO()
+  vao.bind()
 
   # Create Vertex Buffer Object
-  VBO = glGenBuffers(1)
-  glBindBuffer(GL_ARRAY_BUFFER, VBO)
-  glBufferData(GL_ARRAY_BUFFER, 
-               vertices.nbytes, 
-               vertices, 
-               GL_STATIC_DRAW)
+  vbo = Buffer(GL_ARRAY_BUFFER)
+  vbo.bind()
+  vbo.setData(vertices, GL_FLOAT)
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeOfFloat, ctypes.c_void_p(0))
-  glEnableVertexAttribArray(0)
+  ebo = Buffer(GL_ELEMENT_ARRAY_BUFFER)
+  ebo.bind()
+  ebo.setData(indices, GL_UNSIGNED_INT)
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0)
+  vbo.bind()
+  vbo.VertexAttribPointer(0, 3, GL_FALSE, 3 * sizeof(GLfloat), 0)
+
+  vao.unbind()
 
   glBindVertexArray(0)
+
+  Projection = glm.perspective(glm.radians(45.0), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1, 100.0)
+  View = glm.lookAt(glm.vec3(1, 1, 1),
+                    glm.vec3(0, 0, 0),
+                    glm.vec3(0, 1, 0))
+  Model = glm.mat4(1.0)
+  
+  MVP = Projection * View * Model
+  print(MVP)
+
+  mvpID = glGetUniformLocation(program, "MVP")
+  print(mvpID)
 
 
   running = True
   while running:
 
-    events.setvals(pygame.event.get())
+    events.fetch()
     for event in events:
       if event.type == pygame.QUIT:
         running = False
@@ -131,8 +149,9 @@ def main():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     glUseProgram(program)
-    glBindVertexArray(VAO)
-    glDrawArrays(GL_TRIANGLES, 0, 3)
+    vao.bind()
+    glUniformMatrix4fv(mvpID, 1, GL_FALSE, glm.value_ptr(MVP))
+    glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, ctypes.c_void_p(0))
 
     display.update()
 

@@ -37,7 +37,7 @@ class OBJparser:
 
     return (tmp, s[len(tmp)+1:])
 
-  def full_parse(self):
+  def array_parse(self):
     with open(self.filename, "r") as f:
       lines = f.readlines()
 
@@ -58,7 +58,7 @@ class OBJparser:
 
 
 if __name__ == "__main__":
-  parser = OBJparser("objects/cube.obj")
-  parsed = parser.full_parse()
+  parser = OBJparser("objects/triangle.obj")
+  parsed = parser.array_parse()
 
   print(parsed)
