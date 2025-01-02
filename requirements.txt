@@ -1,3 +1,5 @@
 pygame-ce
 pyopengl
 pyopengl-accelerate
+numpy
+ctypes

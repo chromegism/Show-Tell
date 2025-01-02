@@ -3,8 +3,11 @@ from OpenGL.GL import *
 from OpenGL.GL.shaders import compileShader, compileProgram
 from OpenGL.GLU import *
 import ctypes
+import numpy
 print("Imports successful")
 
+
+pygame.init()
 
 class Display:
   def __init__(self, width: int, height: int, window_flags: int, depth: int = 32, framerate: int = 60):
@@ -17,6 +20,9 @@ class Display:
     glViewport(0, 0, width, height)
 
     glEnable(GL_DEPTH_TEST)
+
+  def setCaption(self, caption: str):
+    pygame.display.set_caption(caption)
 
   def update(self):
     pygame.display.flip()
@@ -48,6 +54,7 @@ WINDOW_FLAGS = pygame.WINDOWSHOWN
 def setup():
   global display
   display = Display(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FLAGS)
+  display.setCaption("pygame + pyopengl testing")
 
   global events
   events = EventHandler()
@@ -62,14 +69,15 @@ def renderloop():
   pass
 
 
-
 sizeOfFloat = ctypes.sizeof(GLfloat)
-# Three vertices, with an x,y,z & w for each.
-vertices = [
+# Three vertices, with an x,y,z for each.
+vertices = numpy.array([
   -0.5, -0.5, 0.0,
    0.5, -0.5, 0.0,
    0.0,  0.5, 0.0
-]
+], GLfloat)
+
+# indices = numpy.array([0, 1, 2], GLfloat)
 
 
 def main():
@@ -79,27 +87,25 @@ def main():
     vertStr = vertexShader.read()
     fragStr = fragmentShader.read()
 
-    print(vertStr)
-    print(fragStr)
-
     program = compileProgram(
         compileShader(vertStr, GL_VERTEX_SHADER),
         compileShader(fragStr, GL_FRAGMENT_SHADER)
     )
 
-  VBO, VAO = 0, 0
+  # Create Vertex Array Object
   VAO = glGenVertexArrays(1)
-  VBO = glGenBuffers(1)
   glBindVertexArray(VAO)
 
+  # Create Vertex Buffer Object
+  VBO = glGenBuffers(1)
   glBindBuffer(GL_ARRAY_BUFFER, VBO)
-  array_type = (GLfloat * len(vertices))
   glBufferData(GL_ARRAY_BUFFER, 
-               len(vertices) * sizeOfFloat, 
-               array_type(*vertices), 
+               vertices.nbytes, 
+               vertices, 
                GL_STATIC_DRAW)
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeOfFloat, None)
+  glBindBuffer(GL_ARRAY_BUFFER, VBO)
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeOfFloat, ctypes.c_void_p(0))
   glEnableVertexAttribArray(0)
 
   glBindBuffer(GL_ARRAY_BUFFER, 0)
@@ -122,7 +128,7 @@ def main():
     # renderloop()
 
     glClearColor(0.2, 0.3, 0.3, 1.0)
-    glClear(GL_COLOR_BUFFER_BIT)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     glUseProgram(program)
     glBindVertexArray(VAO)
