@@ -112,7 +112,8 @@ def main():
   ebo.setData(indices, GL_UNSIGNED_INT)
 
   vbo.bind()
-  vbo.VertexAttribPointer(0, 3, GL_FALSE, 3 * sizeof(GLfloat), 0)
+  print(vertices)
+  vbo.VertexAttribPointer(0, GL_FALSE, 3 * sizeof(GLfloat), 0)
 
   vao.unbind()
 
@@ -125,10 +126,11 @@ def main():
   Model = glm.mat4(1.0)
   
   MVP = Projection * View * Model
-  print(MVP)
-
   mvpID = glGetUniformLocation(program, "MVP")
-  print(mvpID)
+
+  # 1.0f, 0.5f, 0.2f
+  colour = glm.vec3(1.0, 0.5, 0.2)
+  colID = glGetUniformLocation(program, "col")
 
 
   running = True
@@ -151,6 +153,7 @@ def main():
     glUseProgram(program)
     vao.bind()
     glUniformMatrix4fv(mvpID, 1, GL_FALSE, glm.value_ptr(MVP))
+    glUniform3fv(colID, 1, glm.value_ptr(colour))
     glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, ctypes.c_void_p(0))
 
     display.update()

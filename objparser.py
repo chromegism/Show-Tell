@@ -10,6 +10,11 @@ class OBJparser:
     
     self.datatypes = {"v": GLfloat,
                       "f": GLuint}
+    
+    vertices = []
+    texverts = []
+    normverts = []
+    faces = []
 
   def parse_vertex(self, raw: str):
     l = []
