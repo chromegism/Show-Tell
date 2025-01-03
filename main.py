@@ -91,12 +91,13 @@ def renderloop():
 def main():
   setup()
 
-  parser = objparser.OBJparser("objects/test.obj")
+  parser = objparser.OBJparser("objects/cubeWTex.obj")
   triangle = parser.unpack_parse()
 
   vertices = triangle["v"]
   texs = triangle["vt"]
   indices = numpy.array(range(len(vertices)), dtype=GLuint)
+  print(texs)
 
   with open("shaders/basicVT.vert.glsl", "r") as vertexShader, open("shaders/basicVT.frag.glsl", "r") as fragmentShader:
     vertStr = vertexShader.read()
@@ -125,7 +126,7 @@ def main():
   glBindVertexArray(0)
 
   Projection = glm.perspective(glm.radians(45.0), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1, 100.0)
-  View = glm.lookAt(glm.vec3(0, 0, 1),
+  View = glm.lookAt(glm.vec3(1, 1, 1),
                     glm.vec3(0, 0, 0),
                     glm.vec3(0, 1, 0))
   # Model = glm.mat4(1.0)
@@ -145,7 +146,7 @@ def main():
 
 
   tex = Texture("materials/test.jpg")
-  tex.setFiltering(GL_NEAREST, GL_LINEAR)
+  tex.setWrapping(GL_REPEAT)
   tex.enableMipmap()
   tex.unbind()
 
@@ -177,7 +178,7 @@ def main():
 
     display.tick()
 
-    # MVP = MVP * glm.rotate(glm.radians(0.5), glm.vec3(1, 1, 0.5))
+    MVP = MVP * glm.rotate(glm.radians(0.5), glm.vec3(1, 1, 0.5))
 
 
 if __name__ == "__main__":

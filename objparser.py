@@ -1,6 +1,9 @@
 import numpy
 from OpenGL.GL import GLfloat, GLuint
 
+def do_nothing(*args):
+  pass
+
 class OBJparser:
   def __init__(self, filename: str):
     self.filename = filename
@@ -9,9 +12,10 @@ class OBJparser:
                         "vt": self.parse_tex,
                         "vn": self.parse_norm,
                         "f": self.parse_face,
-                        "mtllib": lambda x: x,
-                        "o": lambda x: x,
-                        "usemtl": lambda x: x}
+                        "mtllib": do_nothing,
+                        "o": do_nothing,
+                        "usemtl": do_nothing,
+                        "#": do_nothing}
     
     self.datatypes = {"v": GLfloat,
                       "vt": GLfloat,

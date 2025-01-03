@@ -34,7 +34,7 @@ class Texture:
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
   def loadImgFile(self, filename):
-    image = Image.open(filename)
+    image = Image.open(filename).transpose(Image.FLIP_TOP_BOTTOM)
     w = image.width; h = image.height
 
     pix = numpy.array(image, dtype=GLubyte)
@@ -42,10 +42,6 @@ class Texture:
     self.bind()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, pix)
     glGenerateMipmap(GL_TEXTURE_2D)
-    print("test0")
-    numpy.set_printoptions(threshold=1000)
-    print("test1")
-    print(pix)
 
   def bind(self):
     glBindTexture(GL_TEXTURE_2D, self.id)
