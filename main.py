@@ -17,6 +17,8 @@ import objparser
 
 from VAO import *
 from Buffer import *
+from VBO import *
+from Texture import *
 print("Imports successful")
 
 
@@ -33,6 +35,7 @@ class Display:
     glViewport(0, 0, width, height)
 
     glEnable(GL_DEPTH_TEST)
+    glEnable(GL_TEXTURE_2D)
 
   def setCaption(self, caption: str):
     pygame.display.set_caption(caption)
@@ -88,13 +91,14 @@ def renderloop():
 def main():
   setup()
 
-  parser = objparser.OBJparser("objects/cube.obj")
-  triangle = parser.array_parse()
+  parser = objparser.OBJparser("objects/test.obj")
+  triangle = parser.unpack_parse()
 
   vertices = triangle["v"]
-  indices = triangle["f"]
+  texs = triangle["vt"]
+  indices = numpy.array(range(len(vertices)), dtype=GLuint)
 
-  with open("shaders/test.vert.glsl", "r") as vertexShader, open("shaders/test.frag.glsl", "r") as fragmentShader:
+  with open("shaders/basicVT.vert.glsl", "r") as vertexShader, open("shaders/basicVT.frag.glsl", "r") as fragmentShader:
     vertStr = vertexShader.read()
     fragStr = fragmentShader.read()
 
@@ -108,24 +112,20 @@ def main():
   vao.bind()
 
   # Create Vertex Buffer Object
-  vbo = Buffer(GL_ARRAY_BUFFER)
+  vbo = VBO(True, False)
   vbo.bind()
-  vbo.setData(vertices, GL_FLOAT)
+  vbo.setDataSep(vertices, texs)
 
   ebo = Buffer(GL_ELEMENT_ARRAY_BUFFER)
   ebo.bind()
   ebo.setData(indices, GL_UNSIGNED_INT)
-
-  vbo.bind()
-  print(vertices)
-  vbo.VertexAttribPointer(0, GL_FALSE, 3 * sizeof(GLfloat), 0)
 
   vao.unbind()
 
   glBindVertexArray(0)
 
   Projection = glm.perspective(glm.radians(45.0), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1, 100.0)
-  View = glm.lookAt(glm.vec3(1, 1, 1),
+  View = glm.lookAt(glm.vec3(0, 0, 1),
                     glm.vec3(0, 0, 0),
                     glm.vec3(0, 1, 0))
   # Model = glm.mat4(1.0)
@@ -134,7 +134,7 @@ def main():
                     [0, 0.333, 0, 0],
                     [0, 0, 0.333, 0],
                     [0, 0, 0, 1]]) * \
-          glm.rotate(glm.radians(10.0), glm.vec3(1, 0, 0))
+          glm.rotate(glm.radians(10.0), glm.vec3(1, -1, 0))
 
   MVP = Projection * View * Model
   mvpID = glGetUniformLocation(program, "MVP")
@@ -143,6 +143,11 @@ def main():
   colour = glm.vec3(1.0, 0.5, 0.2)
   colID = glGetUniformLocation(program, "col")
 
+
+  tex = Texture("materials/test.jpg")
+  tex.setFiltering(GL_NEAREST, GL_LINEAR)
+  tex.enableMipmap()
+  tex.unbind()
 
   running = True
   while running:
@@ -163,6 +168,7 @@ def main():
 
     glUseProgram(program)
     vao.bind()
+    tex.bind()
     glUniformMatrix4fv(mvpID, 1, GL_FALSE, glm.value_ptr(MVP))
     glUniform3fv(colID, 1, glm.value_ptr(colour))
     glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, ctypes.c_void_p(0))

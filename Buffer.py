@@ -28,9 +28,9 @@ class Buffer:
     self.dtype = dataType
     self.dlen = len(data)
 
-  def VertexAttribPointer(self, index, normalised, _stride, offset):
+  def VertexAttribPointer(self, index, components, normalised, _stride, offset):
     if not self.dtype:
       raise ValueError("Buffer has no data and therefore no type")
     
-    glVertexAttribPointer(index, 3, self.dtype, normalised, _stride, ctypes.c_void_p(offset))
+    glVertexAttribPointer(index, components, self.dtype, normalised, _stride, ctypes.c_void_p(offset))
     glEnableVertexAttribArray(index)
