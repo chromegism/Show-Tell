@@ -1,3 +1,8 @@
+from sys import platform
+if platform == "linux" or platform == "linux2":
+  import os
+  os.environ["SDL_VIDEO_X11_FORCE_EGL"] = "1"
+
 import pygame
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileShader, compileProgram
@@ -83,7 +88,7 @@ def renderloop():
 def main():
   setup()
 
-  parser = objparser.OBJparser("objects/test.obj")
+  parser = objparser.OBJparser("objects/cube.obj")
   triangle = parser.array_parse()
 
   vertices = triangle["v"]
@@ -123,8 +128,14 @@ def main():
   View = glm.lookAt(glm.vec3(1, 1, 1),
                     glm.vec3(0, 0, 0),
                     glm.vec3(0, 1, 0))
-  Model = glm.mat4(1.0)
-  
+  # Model = glm.mat4(1.0)
+
+  Model = glm.mat4([[0.333, 0, 0, 0],
+                    [0, 0.333, 0, 0],
+                    [0, 0, 0.333, 0],
+                    [0, 0, 0, 1]]) * \
+          glm.rotate(glm.radians(10.0), glm.vec3(1, 0, 0))
+
   MVP = Projection * View * Model
   mvpID = glGetUniformLocation(program, "MVP")
 
@@ -159,6 +170,8 @@ def main():
     display.update()
 
     display.tick()
+
+    # MVP = MVP * glm.rotate(glm.radians(0.5), glm.vec3(1, 1, 0.5))
 
 
 if __name__ == "__main__":
