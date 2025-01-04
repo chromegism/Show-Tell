@@ -4,8 +4,9 @@ from OpenGL.GLU import *
 from PIL import Image
 import numpy
 
-
 from matplotlib import pyplot as plt
+
+from functools import cache
 
 
 class Texture:
@@ -29,11 +30,14 @@ class Texture:
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
+  @cache
   def loadImgFile(self, filename):
     image = Image.open(filename).transpose(Image.FLIP_TOP_BOTTOM)
     w = image.width; h = image.height
 
     pix = numpy.array(image, dtype=GLubyte)
+    if len(pix[0]) > 3:
+      pix = pix[:,:,:3]
 
     self.bind()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, pix)

@@ -13,7 +13,7 @@ uniform sampler2D Texture;
 
 void main()
 {
-    float specularStrength = 3.f;
+    float specularStrength = .25f;
 
     vec3 lightDir = normalize(lightPos - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);

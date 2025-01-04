@@ -115,11 +115,22 @@ def main():
   mesh.scale = glm.vec3(0.333, 0.333, 0.333)
   mesh.updateMatrices()
 
-  mesh2 = loadMeshFromFile(cam, "objects/cubeWTexNormal.obj", "materials/test.png")
+  mesh2 = loadMeshFromFile(cam, "objects/skull.obj", "materials/MissingTexture.png")
   mesh2.setProgram(program)
-  mesh2.scale = glm.vec3(0.333, 0.333, 0.333)
+  mesh2.scale = glm.vec3(0.05, 0.05, 0.05)
   mesh2.updateMatrices()
   mesh2.move_to(glm.vec3(-1, -1, 0))
+  mesh2.rotate_by(glm.vec3(glm.radians(-90), 0, 0))
+
+  cubeArr = []
+  for i in range(10):
+    for j in range(10):
+      m = loadMeshFromFile(cam, "objects/cubeWTexNormal.obj")
+      m.setProgram(program)
+      m.scale_to(glm.vec3(1/3, 1/3, 1/3))
+      m.move_to(glm.vec3(5+i*2, 0, 5+j*2))
+      m.setTexture(mesh2.texture)
+      cubeArr.append(m)
 
   movement_speed = 5
 
@@ -187,8 +198,11 @@ def main():
     mesh.render()
     mesh2.render()
     mesh.rotate_by(glm.vec3(glm.radians(1), 0, glm.radians(1)))
-    mesh2.rotate_by(glm.vec3(glm.radians(3), 0, 0))
+    # mesh2.rotate_by(glm.vec3(glm.radians(3), 0, 0))
     # cam.move_by(glm.vec3(0.01, 0, 0))
+
+    for i in cubeArr:
+      i.render()
 
     display.update()
 

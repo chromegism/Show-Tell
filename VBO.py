@@ -44,7 +44,6 @@ class VBO:
 
   def VertexAttribPointers(self, size):
     stride = (3 + (2 if self.has_texture else 0) + (3 if self.has_normal else 0))
-    print(stride * size)
     self.buff.VertexAttribPointer(0, 3, GL_FALSE, stride * size, 0)
     if self.has_texture:
       self.buff.VertexAttribPointer(1, 2, GL_FALSE, stride * size, 3 * size)

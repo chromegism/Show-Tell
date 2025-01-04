@@ -1,6 +1,8 @@
 import numpy
 from OpenGL.GL import GLfloat, GLuint
 
+from functools import cache
+
 def do_nothing(*args):
   pass
 
@@ -15,7 +17,11 @@ class OBJparser:
                         "mtllib": do_nothing,
                         "o": do_nothing,
                         "usemtl": do_nothing,
-                        "#": do_nothing}
+                        "#": do_nothing,
+                        "": do_nothing,
+                        "g": do_nothing,
+                        "vc": do_nothing,
+                        "s": do_nothing}
     
     self.datatypes = {"v": GLfloat,
                       "vt": GLfloat,
@@ -47,6 +53,9 @@ class OBJparser:
   def parse_face(self, raw: str):
     splitted = raw.split()
 
+    if len(splitted) == 4:
+      splitted = [splitted[0], splitted[1], splitted[2], splitted[2], splitted[3], splitted[0]]
+
     t_spl = splitted[0].split("/")
     has_tex = len(t_spl) >= 2
     has_norm = len(t_spl) >= 3
@@ -70,6 +79,7 @@ class OBJparser:
     
     return (tmp, raw[len(tmp)+1:])
 
+  @cache
   def unpack_parse(self):
     with open(self.filename, "r") as f:
       lines = f.readlines()
