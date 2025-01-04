@@ -128,7 +128,7 @@ def main():
       m = loadMeshFromFile(cam, "objects/cubeWTexNormal.obj")
       m.setProgram(program)
       m.scale_to(glm.vec3(1/3, 1/3, 1/3))
-      m.move_to(glm.vec3(5+i*2, 0, 5+j*2))
+      m.move_to(glm.vec3(5+i*2, 3 * glm.sin(glm.radians(-i*10+j*10)) - 1.5, 5+j*2))
       m.setTexture(mesh2.texture)
       cubeArr.append(m)
 
@@ -176,9 +176,9 @@ def main():
       cam.move_right(movement_speed * display.dt)
 
     if checkKeyDown(pygame.K_q):
-      cam.move_up(movement_speed * display.dt)
-    elif checkKeyDown(pygame.K_e):
       cam.move_down(movement_speed * display.dt)
+    elif checkKeyDown(pygame.K_e):
+      cam.move_up(movement_speed * display.dt)
 
     if checkKeyDown(pygame.K_u):
       cam.rotate_pitch_by(glm.radians(-50 * display.dt))
