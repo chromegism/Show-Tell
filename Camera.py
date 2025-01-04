@@ -41,10 +41,6 @@ class Camera:
     self.pos = self.origin
     self.origin = tmp
     self.updateView()
-
-  def calcMVP(self, model: glm.mat4):
-    MVP = self.projection * self.view * model
-    return MVP
   
   def __str__(self):
     return f"<Camera object - pos: {tuple(self.pos)} - origin: {tuple(self.origin)} - ratio: {self.ratio}"

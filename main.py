@@ -92,7 +92,7 @@ def renderloop():
 def main():
   setup()
 
-  with open("shaders/basicVT.vert.glsl", "r") as vertexShader, open("shaders/basicVT.frag.glsl", "r") as fragmentShader:
+  with open("shaders/basicVTN.vert.glsl", "r") as vertexShader, open("shaders/basicVTN.frag.glsl", "r") as fragmentShader:
     vertStr = vertexShader.read()
     fragStr = fragmentShader.read()
 
@@ -106,6 +106,12 @@ def main():
   mesh.setProgram(program)
   mesh.scale = glm.vec3(0.333, 0.333, 0.333)
   mesh.updateMatrices()
+
+  mesh2 = loadMeshFromFile(cam, "objects/cubeWTexNormal.obj", "materials/test.jpg")
+  mesh2.setProgram(program)
+  mesh2.scale = glm.vec3(0.333, 0.333, 0.333)
+  mesh2.updateMatrices()
+  mesh2.move_to(glm.vec3(-1, -1, 0))
 
   running = True
   while running:
@@ -124,15 +130,14 @@ def main():
     glClearColor(0.2, 0.3, 0.3, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    glUseProgram(program)
-    glUniformMatrix4fv(mvpID, 1, GL_FALSE, glm.value_ptr(MVP)) 
     mesh.render()
+    mesh2.render()
+    mesh.rotate_by(glm.vec3(glm.radians(1), 0, glm.radians(1)))
+    # cam.move_by(glm.vec3(0.01, 0, 0))
 
     display.update()
 
     display.tick()
-
-    MVP = MVP * glm.rotate(glm.radians(0.5), glm.vec3(1, 1, 0.5))
 
 
 if __name__ == "__main__":

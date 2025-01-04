@@ -19,10 +19,7 @@ def genModelMatrix(offsets, rotations, scales):
                 [0, 0, 1, 0],
                 [offsets[0], offsets[1], offsets[2], 1]])
   
-  r = glm.mat4(1)
-  r = glm.rotate(r, rotations[0], glm.vec3(1, 0, 0))
-  r = glm.rotate(r, rotations[1], glm.vec3(0, 1, 0))
-  r = glm.rotate(r, rotations[2], glm.vec3(0, 0, 1))
+  r = rotationMatrix(rotations)
 
   s = glm.mat4([[scales[0], 0, 0, 0],
                 [0, scales[1], 0, 0],
@@ -33,6 +30,15 @@ def genModelMatrix(offsets, rotations, scales):
   return model
 
 
+def rotationMatrix(rotations):
+  r = glm.mat4(1)
+  r = glm.rotate(r, rotations[0], glm.vec3(1, 0, 0))
+  r = glm.rotate(r, rotations[1], glm.vec3(0, 1, 0))
+  r = glm.rotate(r, rotations[2], glm.vec3(0, 0, 1))
+
+  return r
+
+
 class Mesh:
   def __init__(self):
     self.vao = None
@@ -40,11 +46,15 @@ class Mesh:
     self.vbo = None
     self.ebo = None
     self.texture = None
+    self.colour = None
 
     self.camera = None
-    self.MVP = None
-    self.mvpID = 0
     self.model = None
+
+    self.modelID = 0
+    self.viewID = 0
+    self.projID = 0
+    self.colourID = 0
 
     self.pos = glm.vec3(0)
     self.rot = glm.vec3(0)
@@ -52,17 +62,25 @@ class Mesh:
 
   def updateMatrices(self):
     self.model = genModelMatrix(self.pos, self.rot, self.scale)
-    self.MVP = self.camera.calcMVP(self.model)
 
   def render(self):
     glUseProgram(self.program)
     self.vao.bind()
-    self.texture.bind()
-    glUniformMatrix4fv(self.mvpID, 1, GL_FALSE, glm.value_ptr(self.MVP))
+
+    if self.texture:
+      self.texture.bind()
+    
+    glUniformMatrix4fv(self.modelID, 1, GL_FALSE, glm.value_ptr(self.model))
+    glUniformMatrix4fv(self.viewID, 1, GL_FALSE, glm.value_ptr(self.camera.view))
+    glUniformMatrix4fv(self.projID, 1, GL_FALSE, glm.value_ptr(self.camera.projection))
+    glUniform3fv(self.colourID, 1, glm.value_ptr(self.colour))
     glDrawElements(GL_TRIANGLES, len(self.ebo), GL_UNSIGNED_INT, ctypes.c_void_p(0))
+
     self.vao.unbind()
     glUseProgram(0)
-    self.texture.unbind()
+
+    if self.texture:
+      self.texture.unbind()
 
   def setVAO(self, vao: VAO):
     self.vao = vao
@@ -70,9 +88,12 @@ class Mesh:
   def setVBO(self, vbo: VBO):
     self.vbo = vbo
 
-  def setProgram(self, program: int, mvpVarName: str = "MVP"):
+  def setProgram(self, program: int, modelVarName: str = "model", viewVarName: str = "view", projectionVarName: str = "projection", colourVarName: str = "Colour"):
     self.program = program
-    self.mvpID = glGetUniformLocation(self.program, mvpVarName)
+    self.modelID = glGetUniformLocation(self.program, modelVarName)
+    self.viewID = glGetUniformLocation(self.program, viewVarName)
+    self.projID = glGetUniformLocation(self.program, projectionVarName)
+    self.colourID = glGetUniformLocation(self.program, colourVarName)
 
   def setEBO(self, ebo: Buffer):
     self.ebo = ebo
@@ -83,9 +104,36 @@ class Mesh:
   def setCamera(self, camera: Camera):
     self.camera = camera
     self.updateMatrices()
+
+  def setColour(self, colour: glm.vec3):
+    self.colour = colour
+
+  def move_by(self, offset: glm.vec3):
+    self.pos += offset
+    self.model = glm.translate(self.model, offset)
+
+  def move_to(self, pos: glm.vec3):
+    self.pos = pos
+    self.updateMatrices()
+
+  def rotate_by(self, r: glm.vec3):
+    self.rot += r
+    self.model = self.model * rotationMatrix(r)
+
+  def rotate_to(self, r: glm.vec3):
+    self.rot = r
+    self.updateMatrices()
+
+  def scale_by(self, s: glm.vec3):
+    self.scale *= s
+    self.model = glm.scale(self.model, s)
+
+  def scale_to(self, s: glm.vec3):
+    self.scale = s
+    self.updateMatrices()
   
 
-def loadMeshFromFile(camera: Camera, path: str, texpath: str | None = None):
+def loadMeshFromFile(camera: Camera, path: str, texpath: str | None = None, colour: glm.vec3 = None):
   m = Mesh()
 
   parser = OBJparser(path)
@@ -116,6 +164,13 @@ def loadMeshFromFile(camera: Camera, path: str, texpath: str | None = None):
   else:
     tex = None
 
+  if colour:
+    m.setColour(colour)
+  elif texpath:
+    m.setColour(glm.vec3(1.0, 1.0, 1.0))
+  else:
+    m.setColour(glm.vec3(1.0, 0.0, 1.0))
+
   m.setVAO(vao)
   m.setVBO(vbo)
   m.setEBO(ebo)
@@ -127,3 +182,4 @@ def loadMeshFromFile(camera: Camera, path: str, texpath: str | None = None):
   
 if __name__ == "__main__":
   loadMeshFromFile("objects/cubeWTex.obj", "materials/test.jpg")
+  
