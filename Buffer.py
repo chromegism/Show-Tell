@@ -34,3 +34,6 @@ class Buffer:
     
     glVertexAttribPointer(index, components, self.dtype, normalised, _stride, ctypes.c_void_p(offset))
     glEnableVertexAttribArray(index)
+
+  def __len__(self):
+    return self.dlen

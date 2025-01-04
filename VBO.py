@@ -3,6 +3,7 @@ import numpy
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+
 class VBO:
   "x, y, z, xt, yt, zt, xn, yn, zn..."
   def __init__(self, has_texture: bool, has_normal: bool):
@@ -17,6 +18,7 @@ class VBO:
     self.VertexAttribPointers(size)
 
   def setDataSep(self, verts: numpy.array, texverts: numpy.array = None, normverts: numpy.array = None, dtype = GL_FLOAT):
+    self.bind()
     stride = (3 + (2 if self.has_texture else 0) + (3 if self.has_normal else 0))
     pairs = round(len(verts) / 3)
     data = numpy.zeros(pairs * stride, GLfloat)

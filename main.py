@@ -19,6 +19,7 @@ from VAO import *
 from Buffer import *
 from VBO import *
 from Texture import *
+from Mesh import *
 print("Imports successful")
 
 
@@ -149,6 +150,10 @@ def main():
   tex.setWrapping(GL_REPEAT)
   tex.enableMipmap()
   tex.unbind()
+
+
+  loadMeshFromFile("objects/cubeWTex.obj", "materials/test.jpg")
+
 
   running = True
   while running:
