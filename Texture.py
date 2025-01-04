@@ -9,12 +9,8 @@ from matplotlib import pyplot as plt
 
 
 class Texture:
-  def __init__(self, filename: str):
-    self.filename = filename
-
+  def __init__(self):
     self.id = glGenTextures(1)
-
-    self.loadImgFile(filename)
 
   def setWrapping(self, option):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, option)

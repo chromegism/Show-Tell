@@ -23,8 +23,6 @@ class VBO:
     pairs = round(len(verts) / 3)
     data = numpy.zeros(pairs * stride, GLfloat)
 
-    print(texverts)
-
     for i in range(0, pairs):
       a = i * 3
       j = i * stride
@@ -35,9 +33,6 @@ class VBO:
         data[j+4] = texverts[b+1]
       if self.has_normal:
         data[j+5] = normverts[a]; data[j+6] = normverts[a+1]; data[j+7] = normverts[a+2]
-
-    for i in range(0, len(data), 5):
-      print(data[i:i+3], data[i+3:i+5])
 
     self.setData(data, dtype)
 
