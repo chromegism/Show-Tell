@@ -115,7 +115,7 @@ def main():
   mesh.scale = glm.vec3(0.333, 0.333, 0.333)
   mesh.updateMatrices()
 
-  mesh2 = loadMeshFromFile(cam, "objects/cubeWTexNormal.obj", "materials/test.jpg")
+  mesh2 = loadMeshFromFile(cam, "objects/cubeWTexNormal.obj", "materials/test.png")
   mesh2.setProgram(program)
   mesh2.scale = glm.vec3(0.333, 0.333, 0.333)
   mesh2.updateMatrices()

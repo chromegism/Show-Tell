@@ -24,7 +24,7 @@ void main()
     float spec = pow(max(dot(camDir, reflectDir), 0.0), 32);
     float specular = specularStrength * spec;
 
-    // FragColor = texture(Texture, texCoord) * vec4(col, 1.f) * diff;
-    FragColor = vec4(1.f, 0.f, 1.f, 1.f) * (diff + specular);
+    FragColor = texture(Texture, texCoord) * vec4(col, 1.f) * (diff + specular);
+    // FragColor = vec4(1.f, 0.f, 1.f, 1.f) * (diff + specular);
     // FragColor = abs(vec4(norm, 1.f)) * diff;
 } 
