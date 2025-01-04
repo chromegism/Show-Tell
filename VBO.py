@@ -34,9 +34,6 @@ class VBO:
       if self.has_normal:
         data[j+5] = normverts[a]; data[j+6] = normverts[a+1]; data[j+7] = normverts[a+2]
 
-    for i in range(0, len(data), 8):
-      print(data[i+5:i+8])
-
     self.setData(data, dtype)
 
   def bind(self):

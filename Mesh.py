@@ -55,6 +55,8 @@ class Mesh:
     self.viewID = 0
     self.projID = 0
     self.colourID = 0
+    self.lightPosID = 0
+    self.camPosID = 0
 
     self.pos = glm.vec3(0)
     self.rot = glm.vec3(0)
@@ -70,10 +72,15 @@ class Mesh:
     if self.texture:
       self.texture.bind()
     
+    # Need to implement a Light class and allow for multiple lights
+    lightPos = glm.vec3(1, 3, 3)
+
     glUniformMatrix4fv(self.modelID, 1, GL_FALSE, glm.value_ptr(self.model))
     glUniformMatrix4fv(self.viewID, 1, GL_FALSE, glm.value_ptr(self.camera.view))
     glUniformMatrix4fv(self.projID, 1, GL_FALSE, glm.value_ptr(self.camera.projection))
     glUniform3fv(self.colourID, 1, glm.value_ptr(self.colour))
+    glUniform3fv(self.lightPosID, 1, glm.value_ptr(lightPos))
+    glUniform3fv(self.camPosID, 1, glm.value_ptr(self.camera.pos))
     glDrawElements(GL_TRIANGLES, len(self.ebo), GL_UNSIGNED_INT, ctypes.c_void_p(0))
 
     self.vao.unbind()
@@ -94,6 +101,8 @@ class Mesh:
     self.viewID = glGetUniformLocation(self.program, viewVarName)
     self.projID = glGetUniformLocation(self.program, projectionVarName)
     self.colourID = glGetUniformLocation(self.program, colourVarName)
+    self.lightPosID = glGetUniformLocation(self.program, "LightPos")
+    self.camPosID = glGetUniformLocation(self.program, "CamPos")
 
   def setEBO(self, ebo: Buffer):
     self.ebo = ebo

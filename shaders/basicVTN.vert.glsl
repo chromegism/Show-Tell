@@ -7,10 +7,17 @@ out vec2 texCoord;
 out vec3 col;
 out vec3 norm;
 
+out vec3 lightPos;
+out vec3 camPos;
+out vec3 FragPos;
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 Colour;
+
+uniform vec3 LightPos;
+uniform vec3 CamPos;
 
 void main()
 {
@@ -20,4 +27,8 @@ void main()
   texCoord = tPos;
   col = Colour;
   norm = mat3(model) * normalize(nVec);
+  lightPos = LightPos;
+
+  FragPos = mat3(model) * vPos;
+  camPos = CamPos;
 }

@@ -45,7 +45,7 @@ class Display:
     pygame.display.flip()
   
   def tick(self):
-    self.dt = self.clock.tick(self.framerate)
+    self.dt = self.clock.tick(self.framerate) / 1000
 
   def destroy(self):
     pygame.display.quit()
@@ -89,6 +89,14 @@ def renderloop():
   pass
 
 
+def checkKeyDown(key):
+  return pygame.key.get_pressed()[key]
+
+def grabMouse(check: bool):
+  pygame.event.set_grab(check)
+  pygame.mouse.set_visible(not check)
+
+
 def main():
   setup()
 
@@ -113,6 +121,13 @@ def main():
   mesh2.updateMatrices()
   mesh2.move_to(glm.vec3(-1, -1, 0))
 
+  movement_speed = 5
+
+  mouse_sensitivity = 16
+  grabMouse(True)
+  mouse_mov = (0, 0)
+  mouse_grabbing = True
+
   running = True
   while running:
 
@@ -125,6 +140,45 @@ def main():
         if event.key == pygame.K_ESCAPE:
           running = False
 
+        elif event.key == pygame.K_TAB:
+          cam.move_origin_to(glm.vec3(0, 0, 0))
+          cam.move_to(glm.vec3(1, 1, 1))
+
+        elif event.key == pygame.K_F2:
+          mouse_grabbing = not mouse_grabbing
+          grabMouse(mouse_grabbing)
+
+      elif event.type == pygame.MOUSEMOTION:
+        mouse_mov = event.rel
+
+    if mouse_grabbing:
+      pygame.mouse.set_pos((int(WINDOW_WIDTH / 2), int(WINDOW_HEIGHT / 2)))
+
+    if checkKeyDown(pygame.K_w):
+      cam.move_forward(movement_speed * display.dt)
+    elif checkKeyDown(pygame.K_s):
+      cam.move_backward(movement_speed * display.dt)
+
+    if checkKeyDown(pygame.K_a):
+      cam.move_left(movement_speed * display.dt)
+    elif checkKeyDown(pygame.K_d):
+      cam.move_right(movement_speed * display.dt)
+
+    if checkKeyDown(pygame.K_q):
+      cam.move_up(movement_speed * display.dt)
+    elif checkKeyDown(pygame.K_e):
+      cam.move_down(movement_speed * display.dt)
+
+    if checkKeyDown(pygame.K_u):
+      cam.rotate_pitch_by(glm.radians(-50 * display.dt))
+    elif checkKeyDown(pygame.K_j):
+      cam.rotate_pitch_by(glm.radians(50 * display.dt))
+
+    if checkKeyDown(pygame.K_h):
+      cam.rotate_yaw_by(glm.radians(100 * display.dt))
+    elif checkKeyDown(pygame.K_k):
+      cam.rotate_yaw_by(glm.radians(-100 * display.dt))
+
     # renderloop()
 
     glClearColor(0.2, 0.3, 0.3, 1.0)
@@ -133,9 +187,16 @@ def main():
     mesh.render()
     mesh2.render()
     mesh.rotate_by(glm.vec3(glm.radians(1), 0, glm.radians(1)))
+    mesh2.rotate_by(glm.vec3(glm.radians(3), 0, 0))
     # cam.move_by(glm.vec3(0.01, 0, 0))
 
     display.update()
+
+    if mouse_mov != (0, 0):
+      cam.rotate_yaw_by(-glm.radians(mouse_mov[0] * mouse_sensitivity * display.dt))
+      cam.rotate_pitch_by(glm.radians(mouse_mov[1] * mouse_sensitivity * display.dt))
+
+    mouse_mov = (0, 0)
 
     display.tick()
 
