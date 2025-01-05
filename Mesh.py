@@ -11,6 +11,7 @@ from VBO import *
 from Texture import *
 from objparser import *
 from Camera import *
+import copy
 
 
 def genModelMatrix(offsets, rotations, scales):
@@ -140,6 +141,31 @@ class Mesh:
   def scale_to(self, s: glm.vec3):
     self.scale = s
     self.updateMatrices()
+
+  def copy(self):
+    m = Mesh()
+    m.vao = self.vao
+    m.program = self.program
+    m.vbo = self.vbo
+    m.ebo = self.ebo
+    m.texture = self.texture
+    m.colour = self.colour
+
+    m.camera = self.camera
+    m.model = self.model
+
+    m.modelID = self.modelID
+    m.viewID = self.viewID
+    m.projID = self.projID
+    m.colourID = self.colourID
+    m.lightPosID = self.lightPosID
+    m.camPosID = self.camPosID
+
+    m.pos = self.pos
+    m.rot = self.rot
+    m.scale = self.scale
+
+    return m
   
 
 def loadMeshFromFile(camera: Camera, path: str, texpath: str | None = None, colour: glm.vec3 = None):

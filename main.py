@@ -9,11 +9,12 @@ from OpenGL.GL.shaders import compileShader, compileProgram
 from OpenGL.GLU import *
 
 import glm
+import random
 
-import ctypes
-from ctypes import sizeof
-import numpy
-import objparser
+# import ctypes
+# from ctypes import sizeof
+# import numpy
+# import objparser
 
 from VAO import *
 from Buffer import *
@@ -26,7 +27,10 @@ print("Imports successful")
 pygame.init()
 
 class Display:
-  def __init__(self, width: int, height: int, window_flags: int, depth: int = 32, framerate: int = 60):
+  def __init__(self, width: int, height: int, window_flags: int, depth: int = 32, framerate: int = 60, multisamples: int = 4):
+    pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS, 1)
+    pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES, 4)
+
     self.screen = pygame.display.set_mode((width, height), window_flags | pygame.OPENGL | pygame.DOUBLEBUF, depth)
 
     self.clock = pygame.time.Clock()
@@ -36,7 +40,12 @@ class Display:
     glViewport(0, 0, width, height)
 
     glEnable(GL_DEPTH_TEST)
+    glEnable(GL_MULTISAMPLE)
     glEnable(GL_TEXTURE_2D)
+
+    error = glGetError()
+    if error != GL_NO_ERROR:
+      print("OpenGL Error:", error)
 
   def setCaption(self, caption: str):
     pygame.display.set_caption(caption)
@@ -73,7 +82,7 @@ WINDOW_FLAGS = pygame.WINDOWSHOWN
 
 def setup():
   global display
-  display = Display(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FLAGS)
+  display = Display(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FLAGS, multisamples=4)
   display.setCaption("pygame + pyopengl testing")
 
   global events
@@ -85,10 +94,6 @@ def destroy():
   pygame.quit()
 
 
-def renderloop():
-  pass
-
-
 def checkKeyDown(key):
   return pygame.key.get_pressed()[key]
 
@@ -97,7 +102,7 @@ def grabMouse(check: bool):
   pygame.mouse.set_visible(not check)
 
 
-def main():
+def test1():
   setup()
 
   with open("shaders/basicVTN.vert.glsl", "r") as vertexShader, open("shaders/basicVTN.frag.glsl", "r") as fragmentShader:
@@ -122,14 +127,17 @@ def main():
   mesh2.move_to(glm.vec3(-1, -1, 0))
   mesh2.rotate_by(glm.vec3(glm.radians(-90), 0, 0))
 
+  tex = Texture()
+  tex.loadImgFile("materials/white.png")
+
   cubeArr = []
-  for i in range(10):
-    for j in range(10):
-      m = loadMeshFromFile(cam, "objects/cubeWTexNormal.obj")
-      m.setProgram(program)
-      m.scale_to(glm.vec3(1/3, 1/3, 1/3))
+  for i in range(15):
+    for j in range(15):
+      m = mesh.copy()
       m.move_to(glm.vec3(5+i*2, 3 * glm.sin(glm.radians(-i*10+j*10)) - 1.5, 5+j*2))
-      m.setTexture(mesh2.texture)
+      m.setTexture(tex)
+      m.setColour(glm.vec3(i / 15, 0, j / 15))
+      m.rotate_to(glm.vec3(glm.radians(random.randint(0, 360)), glm.radians(random.randint(0, 360)), glm.radians(random.randint(0, 360))))
       cubeArr.append(m)
 
   movement_speed = 5
@@ -190,14 +198,12 @@ def main():
     elif checkKeyDown(pygame.K_k):
       cam.rotate_yaw_by(glm.radians(-100 * display.dt))
 
-    # renderloop()
-
     glClearColor(0.2, 0.3, 0.3, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     mesh.render()
     mesh2.render()
-    mesh.rotate_by(glm.vec3(glm.radians(1), 0, glm.radians(1)))
+    mesh.rotate_by(glm.vec3(glm.radians(100 * display.dt), 0, glm.radians(1)))
     # mesh2.rotate_by(glm.vec3(glm.radians(3), 0, 0))
     # cam.move_by(glm.vec3(0.01, 0, 0))
 
@@ -216,4 +222,4 @@ def main():
 
 
 if __name__ == "__main__":
-  main()
+  test1()
