@@ -3,4 +3,4 @@
 <p>Got burnt out and cba to do any more</p>
 
 <h2>Example image</h2>
-![image](https://github.com/chromegism/Show-Tell/blob/main/README_Data/image.png?raw=true)
+![Example](https://github.com/chromegism/Show-Tell/blob/main/README_Data/image.png)
