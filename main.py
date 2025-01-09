@@ -29,7 +29,7 @@ pygame.init()
 class Display:
   def __init__(self, width: int, height: int, window_flags: int, depth: int = 32, framerate: int = 60, multisamples: int = 4):
     pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLEBUFFERS, 1)
-    pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES, 4)
+    pygame.display.gl_set_attribute(pygame.GL_MULTISAMPLESAMPLES, multisamples)
 
     self.screen = pygame.display.set_mode((width, height), window_flags | pygame.OPENGL | pygame.DOUBLEBUF, depth)
 
@@ -82,7 +82,7 @@ WINDOW_FLAGS = pygame.WINDOWSHOWN
 
 def setup():
   global display
-  display = Display(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FLAGS, multisamples=4)
+  display = Display(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FLAGS)
   display.setCaption("pygame + pyopengl testing")
 
   global events
